@@ -5,9 +5,9 @@
     <link rel="stylesheet" href="_static/css/page.css" type="text/css">
     <link rel="stylesheet" href="_static/css/boilerplate.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/fbm.css" type="text/css" />
-    <link rel="stylesheet" href="_static/jquery/css/themes/base/jquery-ui.min.css" >
-    <script src="_static/jquery/js/jquery-1.11.3.min.js"></script>
-    <script src="_static/jquery/js/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="_static2/jquery.ui/jquery-ui.min.css" >
+    <script src="_static2/jquery.min.js"></script>
+    <script src="_static2/jquery.ui/jquery-ui.min.js"></script>
     <script src="mpl.js"></script>
 
     <link rel="stylesheet" href="_static2/jquery.uix.multiselect/css/jquery.uix.multiselect.css" >
@@ -25,6 +25,8 @@
         });
 
         $("#disabler").button();
+        $("#submit").button();
+
         $("#plotchooser").menu({
           select: function(event, ui) {
             var change_to = ui.item.attr("tag")
@@ -73,6 +75,7 @@
       body {
         padding-left: 10px;
         font-size: 15px;
+        background-color: #EFFFE6;
       }
 
       .center {
@@ -125,8 +128,9 @@
       <span style="font-size: 11px; margin-left:-6px; color: #808080">alpha</span>
     </h1>
     <button style="margin-top:10px; margin-right:20px; float:right" id="disabler">Close this app</button>
-    <div class="center" style="margin-top:60px">
+    <div class="center" style="margin-top:60px; margin-bottom: 80px">
       <div style="margin-top: 50px; margin-bottom: 5px; height: 300px;">
+
         <div style="float: left; margin-right:10px">
           <legend class="text">Choose what you want to plot</legend>
           <ul id="plotchooser">
@@ -147,6 +151,7 @@
           <select id="multiselect_groups" name="multiselect" class="multiselect" multiple="multiple">
           </select>
         </div>
+
       </div>
 
       <div class="center" style="margin-top: 10px" id="figure"> </div>
