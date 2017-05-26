@@ -22,14 +22,13 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='eyepystan',
-      version='0.1',
+      version='0.1.1',
       description='Visualization web application for PyStan',
       author='Marco Inacio',
       author_email='pythonpackages@marcoinacio.com',
       packages=['eyepystan'],
-      package_data={'eyepystan': ["data/template.html", "data/jquery.js"]},
+      package_data={'eyepystan': ["data/*"]},
       keywords = ['mcmc', 'bayesian', 'stan', 'pystan'],
       license='GPL3',
-      requires=['pystan', 'bokeh', 'jinja2', 'yaml', 'tornado',
-                'statsmodel']
+      requires=['pystan', 'mcmcplotlib', 'tornado']
      )

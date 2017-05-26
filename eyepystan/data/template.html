@@ -1,32 +1,155 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="_static/css/page.css" type="text/css">
+    <link rel="stylesheet" href="_static/css/boilerplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/css/fbm.css" type="text/css" />
+    <link rel="stylesheet" href="_static/jquery/css/themes/base/jquery-ui.min.css" >
+    <script src="_static/jquery/js/jquery-1.11.3.min.js"></script>
+    <script src="_static/jquery/js/jquery-ui.min.js"></script>
+    <script src="mpl.js"></script>
 
-<head>
-  <meta charset="utf-8">
-  <title>EyePyStan App</title>
-  <script>{{ jquery|safe }}</script>
-  <style>
-    body {font-family: Arial}
-  </style>
-</head>
+    <link rel="stylesheet" href="_static2/jquery.uix.multiselect/css/jquery.uix.multiselect.css" >
+    <script src="_static2/jquery.uix.multiselect/js/jquery.uix.multiselect.min.js"></script>
 
-<body>
-  <div id="disabler" style="position:fixed; display:None;
-         z-index: 1000;
-         top:0; left:0; bottom:0; right:0;
-         width:100%; height:100%;
-         background:rgba(150, 150, 150, .9);">
-    <div style="position: fixed; top: 50%; left:0; right:0;
-                font-size: 30px; font-weight: bold; text-align: center;
-                color: darkgreen">
-      You may close this page now
+    <script>
+      function ondownload(figure, format) {
+        window.open('download.' + format, '_blank');
+      };
+
+      $(document).ready( function() {
+        $("#disabler").click( function( event ) {
+          $("#disabled").css("display", "Block");
+          $.ajax("closeapp");
+        });
+
+        $("#disabler").button();
+        $("#plotchooser").menu({
+          select: function(event, ui) {
+            var change_to = ui.item.attr("tag")
+            if (change_to == "pass") {
+              return;
+            }
+            $('div#figure').html("Loading");
+            $.post("plot_change", "change_to=" + change_to)
+              .done(function( id ) {
+                $('div#figure').html("");
+                var websocket_type = mpl.get_websocket_type();
+                var websocket = new websocket_type("%(ws_uri)sws");
+                var fig = new mpl.figure(id, websocket, ondownload,
+                                         $('div#figure'));
+                $('div#figure > div, div#figure > div > div')
+                  .addClass("center")
+              });
+          }
+        });
+
+        $.getJSON("query_parameters")
+          .done(function( gfnames ) {
+            for (var key in gfnames){
+              var group_id = "par_group_" + key
+              var gfname = gfnames[key]
+              $("#multiselect_groups")
+                .append('<optgroup label="' + key +
+                  '" id="' + group_id + '"></optgroup>')
+              for (i = 0; i < gfname.length; i++) {
+                $("#" + group_id)
+                  .append('<option value="' + gfname[i] +
+                    '">' + gfname[i] + '</option>')
+              }
+            }
+            $("#multiselect_groups").multiselect();
+            $("#multiselect_groups").change(function(){alert($(this).val())})
+            $("#multiselect_groups").on('selectmenuchange', function(){alert($(this).val())})
+
+          });
+
+
+
+      });
+    </script>
+    <style>
+      body {
+        padding-left: 10px;
+        font-size: 15px;
+      }
+
+      .center {
+        width:1000px;
+        margin-left:auto;
+        margin-right:auto
+      }
+
+      .multiselect {
+        width: 650px;
+        height: 300px;
+      }
+
+      .text {
+        font-family: Arial;
+        color: #555; text-shadow: 1px 1px 1px #ddd;
+      }
+
+      #disabled {
+        position:fixed; display:None;
+        z-index: 1000;
+        top:0; left:0; bottom:0; right:0;
+        width:100%%; height:100%%;
+        background:rgba(150, 150, 150, .9);
+      }
+
+      #disabled-sub {
+        position: fixed; top: 50%%; left:0; right:0;
+        font-size: 30px; font-weight: bold; text-align: center;
+        color: darkgreen
+      }
+
+      #header {
+        font-size: 35px; position: absolute;
+        top:0; right:0; left:0;
+        text-align: center;
+      }
+    </style>
+    <title>EyePyStan web app</title>
+  </head>
+
+  <body>
+    <div id="disabled">
+      <div id="disabled-sub">
+        You may close this page now
+      </div>
     </div>
-  </div>
-  <h1 style="position: absolute; top:0; right:0; left:0; text-align: center;">
-    <span style="color: #e9e9e9; text-shadow: 1px 1px 2px #101010;">EyePyStan</span>
-    <span style="font-size: 11px; margin-left:-3px; color: #a0a0a0">alpha</span>
-  </h1>
-  <span id="content">{{ script|safe }}</span>
-</body>
+    <h1 id="header">
+      <span style="color: #e9e9e9; text-shadow: 1px 1px 2px #101010;">EyePyStan</span>
+      <span style="font-size: 11px; margin-left:-6px; color: #808080">alpha</span>
+    </h1>
+    <button style="margin-top:10px; margin-right:20px; float:right" id="disabler">Close this app</button>
+    <div class="center" style="margin-top:60px">
+      <div style="margin-top: 50px; margin-bottom: 5px; height: 300px;">
+        <div style="float: left; margin-right:10px">
+          <legend class="text">Choose what you want to plot</legend>
+          <ul id="plotchooser">
+            <li class="ui-state-disabled"><div>Estimate</div></li>
+            <li tag="pass"><div>Diagnostic</div>
+              <ul>
+                <li class="ui-state-disabled"><div>Gelman criteria</div></li>
+                <li class="ui-state-disabled"><div>Rhat</div></li>
+                <li class="ui-state-disabled"><div>Traceplot</div></li>
+                <li tag="other"><div>Other</div></li>
+              </ul>
+            </li>
+            <li tag="test"><div>Test</div></li>
+          </ul>
+        </div>
 
+        <div id="parameters">
+          <select id="multiselect_groups" name="multiselect" class="multiselect" multiple="multiple">
+          </select>
+        </div>
+      </div>
+
+      <div class="center" style="margin-top: 10px" id="figure"> </div>
+    </div>
+  </body>
 </html>
